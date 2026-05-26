@@ -4,22 +4,30 @@ package.name = sshtool
 package.domain = org.test
 
 source.dir = .
-source.include_exts = py,png,jpg,kv
+source.include_exts = py,kv,png,jpg
 
 version = 1.0
 
-requirements = python3,kivy==2.2.1,paramiko==3.4.0,cryptography==41.0.7,pynacl==1.5.0,bcrypt==4.1.2,requests
+requirements = python3,kivy==2.3.0,kivymd==1.1.1,paramiko,cryptography,pynacl,bcrypt,requests
 
 orientation = portrait
 
 android.permissions = INTERNET
 
+# 🔥 ВАЖЛИВО
 android.api = 33
 android.minapi = 21
-android.archs = arm64-v8a
+android.arch = arm64-v8a
 
+# ❌ ВИМКНИ AAB (це твоя помилка)
+android.release_artifact = apk
+
+# ❌ НЕ ДАЄМО AUTO p4a master (ламає збірки)
+p4a.branch = release-2024.01.21
+
+# 🔥 ФІКС JAVA / SDK
 android.accept_sdk_license = True
-p4a.branch = stable
+android.ndk = 25b
 
 log_level = 2
 
