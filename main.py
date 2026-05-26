@@ -1,49 +1,57 @@
-from kivymd.app import MDApp
-from kivymd.uix.screen import Screen
-from kivymd.uix.button import MDRaisedButton
-from kivymd.uix.textfield import MDTextField
-from kivymd.uix.label import MDLabel
+from kivy.app import App
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.button import Button
+from kivy.uix.textinput import TextInput
+from kivy.uix.label import Label
 
-import requests
+import paramiko
+import threading
 
 
-class SSHApp(MDApp):
+class SSHApp(App):
 
     def build(self):
-        self.screen = Screen()
+        layout = BoxLayout(orientation='vertical', padding=20, spacing=10)
 
-        self.host = MDTextField(
-            hint_text="Server URL (http://...)",
-            pos_hint={"center_x": 0.5, "center_y": 0.75},
-            size_hint=(0.8, None)
+        self.login = TextInput(hint_text="Login", multiline=False)
+        self.password = TextInput(hint_text="Password", password=True, multiline=False)
+        self.host = TextInput(hint_text="Host", multiline=False)
+
+        self.output = Label(text="Result will appear here")
+
+        btn = Button(text="CHECK VERSION")
+        btn.bind(on_press=self.check_version)
+
+        layout.add_widget(self.login)
+        layout.add_widget(self.password)
+        layout.add_widget(self.host)
+        layout.add_widget(btn)
+        layout.add_widget(self.output)
+
+        return layout
+
+    def ssh_connect(self):
+        client = paramiko.SSHClient()
+        client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+
+        client.connect(
+            hostname=self.host.text,
+            username=self.login.text,
+            password=self.password.text,
+            timeout=10
         )
+        return client
 
-        self.output = MDLabel(
-            text="Result...",
-            pos_hint={"center_x": 0.5, "center_y": 0.3},
-            halign="center"
-        )
+    def check_version(self, instance):
+        threading.Thread(target=self._run).start()
 
-        btn = MDRaisedButton(
-            text="CHECK SERVER",
-            pos_hint={"center_x": 0.5, "center_y": 0.5}
-        )
-        btn.bind(on_press=self.check)
-
-        self.screen.add_widget(self.host)
-        self.screen.add_widget(btn)
-        self.screen.add_widget(self.output)
-
-        return self.screen
-
-    def check(self, instance):
+    def _run(self):
         try:
-            url = self.host.text.strip()
-
-            r = requests.get(url, timeout=5)
-
-            self.output.text = f"OK: {r.status_code}"
-
+            client = self.ssh_connect()
+            _, stdout, _ = client.exec_command("uname -r")
+            result = stdout.read().decode().strip()
+            self.output.text = f"Kernel: {result}"
+            client.close()
         except Exception as e:
             self.output.text = str(e)
 
