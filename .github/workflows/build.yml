@@ -11,19 +11,22 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install system dependencies
+      - name: System deps
         run: |
           sudo apt update
           sudo apt install -y python3-pip git zip unzip openjdk-17-jdk \
           autoconf libtool pkg-config
 
-      - name: Install Buildozer
+      - name: Install Buildozer (stable only)
         run: |
           pip install --upgrade pip
           pip install buildozer==1.5.0 cython
+
+      - name: FORCE OLD python-for-android
+        run: |
           pip install "python-for-android==2023.9.16"
 
-      - name: Accept Android licenses
+      - name: Fix licenses
         run: yes | sdkmanager --licenses || true
 
       - name: Build APK
