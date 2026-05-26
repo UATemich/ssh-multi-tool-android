@@ -1,0 +1,7 @@
+kivy
+kivymd
+paramiko
+colorama
+cryptography
+pynacl
+bcrypt
