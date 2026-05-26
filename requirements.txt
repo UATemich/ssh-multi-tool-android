@@ -1,3 +1,6 @@
-kivy
-kivymd
+kivy==2.2.1
+paramiko==3.4.0
+cryptography==41.0.7
+pynacl==1.5.0
+bcrypt==4.1.2
 requests
