@@ -12,6 +12,8 @@ requirements = python3,kivy,kivymd,paramiko,cryptography,pynacl,bcrypt
 
 orientation = portrait
 
+android.permissions = INTERNET
+
 [android]
 android.api = 33
 android.minapi = 21
