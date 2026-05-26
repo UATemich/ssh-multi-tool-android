@@ -1,24 +1,18 @@
 [app]
-
 title = SSHTool
 package.name = sshtool
-package.domain = org.example
+package.domain = org.test
 
 source.dir = .
-source.include_exts = py,png,jpg,kv
+source.include_exts = py,kv
 
 version = 1.0
 
-requirements = python3,kivy,kivymd,paramiko,cryptography,pynacl,bcrypt,colorama
+requirements = python3,kivy,paramiko,cryptography,pynacl,bcrypt
 
 orientation = portrait
 
-[buildozer]
-
-log_level = 2
-
 [android]
-
 android.api = 33
 android.minapi = 21
 android.arch = arm64-v8a
