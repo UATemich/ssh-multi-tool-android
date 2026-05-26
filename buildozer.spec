@@ -4,11 +4,11 @@ package.name = sshtool
 package.domain = org.test
 
 source.dir = .
-source.include_exts = py,kv,png,jpg
+source.include_exts = py
 
 version = 1.0
 
-requirements = python3,kivy==2.3.0,kivymd==1.1.1,requests,paramiko,cryptography,pynacl,bcrypt
+requirements = python3,kivy==2.3.0,paramiko,cryptography,pynacl,bcrypt
 
 orientation = portrait
 
@@ -18,13 +18,12 @@ android.api = 33
 android.minapi = 21
 android.archs = arm64-v8a
 
-# FIX
-android.accept_sdk_license = True
+# IMPORTANT FIXES
+p4a.branch = stable
 android.ndk = 25b
 android.build_tools_version = 33.0.2
 
-# IMPORTANT (avoid broken new p4a)
-p4a.branch = stable
+android.accept_sdk_license = True
 
 log_level = 2
 
