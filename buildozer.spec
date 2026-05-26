@@ -8,7 +8,7 @@ source.include_exts = py,kv
 
 version = 1.0
 
-requirements = python3,kivy,paramiko,cryptography,pynacl,bcrypt
+requirements = python3,kivy,kivymd,paramiko,cryptography,pynacl,bcrypt
 
 orientation = portrait
 
