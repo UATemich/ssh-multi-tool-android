@@ -65,7 +65,7 @@ class SSHApp(MDApp):
         return client
 
     def check_version(self, instance):
-        threading.Thread(target=self._check_version).start()
+        threading.Thread(target=self._check_version, daemon=True).start()
 
     def _check_version(self):
         try:
