@@ -1,59 +1,56 @@
 from kivy.app import App
 from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.button import Button
 from kivy.uix.textinput import TextInput
+from kivy.uix.button import Button
 from kivy.uix.label import Label
-
 import paramiko
-import threading
 
 
-class SSHApp(App):
+class SSHClientUI(BoxLayout):
+    def __init__(self, **kwargs):
+        super().__init__(orientation='vertical', **kwargs)
 
-    def build(self):
-        layout = BoxLayout(orientation='vertical', padding=20, spacing=10)
-
-        self.login = TextInput(hint_text="Login", multiline=False)
-        self.password = TextInput(hint_text="Password", password=True, multiline=False)
         self.host = TextInput(hint_text="Host", multiline=False)
+        self.user = TextInput(hint_text="Username", multiline=False)
+        self.password = TextInput(hint_text="Password", multiline=False, password=True)
 
-        self.output = Label(text="Result will appear here")
+        self.output = Label(text="Output...")
 
-        btn = Button(text="CHECK VERSION")
-        btn.bind(on_press=self.check_version)
+        btn = Button(text="Connect")
+        btn.bind(on_press=self.connect)
 
-        layout.add_widget(self.login)
-        layout.add_widget(self.password)
-        layout.add_widget(self.host)
-        layout.add_widget(btn)
-        layout.add_widget(self.output)
+        self.add_widget(self.host)
+        self.add_widget(self.user)
+        self.add_widget(self.password)
+        self.add_widget(btn)
+        self.add_widget(self.output)
 
-        return layout
-
-    def ssh_connect(self):
-        client = paramiko.SSHClient()
-        client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-
-        client.connect(
-            hostname=self.host.text,
-            username=self.login.text,
-            password=self.password.text,
-            timeout=10
-        )
-        return client
-
-    def check_version(self, instance):
-        threading.Thread(target=self._run).start()
-
-    def _run(self):
+    def connect(self, instance):
         try:
-            client = self.ssh_connect()
-            _, stdout, _ = client.exec_command("uname -r")
-            result = stdout.read().decode().strip()
-            self.output.text = f"Kernel: {result}"
+            client = paramiko.SSHClient()
+            client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+
+            client.connect(
+                hostname=self.host.text,
+                username=self.user.text,
+                password=self.password.text,
+                timeout=5
+            )
+
+            stdin, stdout, stderr = client.exec_command("whoami && uname -a")
+            result = stdout.read().decode()
+
+            self.output.text = result
+
             client.close()
+
         except Exception as e:
             self.output.text = str(e)
 
 
-SSHApp().run()
+class SSHTool(App):
+    def build(self):
+        return SSHClientUI()
+
+
+SSHTool().run()
