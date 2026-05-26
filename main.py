@@ -1,84 +1,39 @@
-from kivymd.app import MDApp
-from kivymd.uix.screen import Screen
-from kivymd.uix.button import MDRaisedButton
-from kivymd.uix.textfield import MDTextField
-from kivymd.uix.label import MDLabel
+name: Build APK
 
-import paramiko
-import threading
+on:
+  workflow_dispatch:
 
+jobs:
+  build:
+    runs-on: ubuntu-22.04
 
-class SSHApp(MDApp):
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
 
-    def build(self):
-        self.screen = Screen()
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: 3.10
 
-        self.login = MDTextField(
-            hint_text="Login",
-            pos_hint={"center_x": 0.5, "center_y": 0.85},
-            size_hint=(0.8, None)
-        )
+    - name: Install dependencies
+      run: |
+        sudo apt update
+        sudo apt install -y git zip unzip openjdk-17-jdk \
+        autoconf libtool pkg-config zlib1g-dev libncurses5-dev \
+        libncursesw5-dev cmake libffi-dev libssl-dev
 
-        self.password = MDTextField(
-            hint_text="Password",
-            password=True,
-            pos_hint={"center_x": 0.5, "center_y": 0.75},
-            size_hint=(0.8, None)
-        )
+    - name: Install Python packages
+      run: |
+        pip install --upgrade pip
+        pip install buildozer cython
 
-        self.host = MDTextField(
-            hint_text="Host (a2469-m1)",
-            pos_hint={"center_x": 0.5, "center_y": 0.65},
-            size_hint=(0.8, None)
-        )
+    - name: Build APK
+      run: |
+        buildozer android debug
 
-        self.output = MDLabel(
-            text="",
-            pos_hint={"center_x": 0.5, "center_y": 0.3},
-            halign="center"
-        )
-
-        btn_version = MDRaisedButton(
-            text="CHECK VERSION",
-            pos_hint={"center_x": 0.5, "center_y": 0.45}
-        )
-        btn_version.bind(on_press=self.check_version)
-
-        self.screen.add_widget(self.login)
-        self.screen.add_widget(self.password)
-        self.screen.add_widget(self.host)
-        self.screen.add_widget(btn_version)
-        self.screen.add_widget(self.output)
-
-        return self.screen
-
-    def ssh_connect(self):
-        client = paramiko.SSHClient()
-        client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-
-        client.connect(
-            hostname=self.host.text,
-            username=self.login.text,
-            password=self.password.text,
-            timeout=10
-        )
-        return client
-
-    def check_version(self, instance):
-        threading.Thread(target=self._check_version).start()
-
-    def _check_version(self):
-        try:
-            client = self.ssh_connect()
-            stdin, stdout, _ = client.exec_command("uname -r")
-            result = stdout.read().decode().strip()
-
-            self.output.text = f"Kernel: {result}"
-
-            client.close()
-
-        except Exception as e:
-            self.output.text = str(e)
-
-
-SSHApp().run()
+    - name: Upload APK
+      uses: actions/upload-artifact@v4
+      with:
+        name: apk
+        path: bin/*.apk
